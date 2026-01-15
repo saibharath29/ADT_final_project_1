@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Data
+data/datasets/*.csv
+data/datasets/*.pkl
+data/datasets/*.parquet
+data/embeddings/
+models/
+
+# Logs
+logs/
+*.log
+
+# Results
+benchmarks/results/
+*.png
+*.pdf
+
+# Database
+*.db
+*.sqlite
+
+# Environment
+.env
+.venv
+config.local.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
+
+# Hidden backup
+.backup/
+
+# Future phases (not yet implemented)
+src/ml/
+src/calibration/
+src/database/
+src/distributed/
+src/execution/
+dashboards/
+benchmarks/tpch_benchmark.py
+main_system.py
+demo.py
+quick_start.py
+ui_app.py
+slides/
+GETTING_STARTED.md
+LEARNING_RESOURCES.md
+PREPROPOSAL_README.md
+notebooks/
+ppt/

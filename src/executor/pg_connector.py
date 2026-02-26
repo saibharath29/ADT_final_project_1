@@ -11,6 +11,7 @@ import numpy as np
 from typing import List, Dict, Any, Optional, Tuple
 import logging
 import yaml
+from psycopg2 import sql
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class PostgreSQLConnector:
             self.conn.close()
         logger.info("Disconnected from database")
     
-    def execute_query(self, query: str, params: Optional[tuple] = None) -> List[tuple]:
+    def execute_query(self, query: Any, params: Optional[tuple] = None) -> List[tuple]:
         """
         Execute SQL query and return results.
         
@@ -75,6 +76,9 @@ class PostgreSQLConnector:
         Returns:
             List of result tuples
         """
+        if not self.conn or not self.cursor:
+            raise RuntimeError("Database connection is not established. Call connect() first.")
+            
         try:
             self.cursor.execute(query, params)
             
@@ -127,18 +131,19 @@ class PostgreSQLConnector:
             raise ValueError(f"Unknown distance metric: {distance_metric}")
         
         # Build query
-        query = f"""
+        query = sql.SQL("""
             SELECT *
-            FROM {table}
-        """
+            FROM {}
+        """).format(sql.Identifier(table))
         
         if where_clause:
-            query += f" WHERE {where_clause}"
+            # Note: where_clause must be safely constructed by caller or use parameterized queries
+            query = query + sql.SQL(f" WHERE {where_clause}")
         
-        query += f"""
-            ORDER BY {embedding_column} {operator} %s
+        query = query + sql.SQL("""
+            ORDER BY {} {} %s
             LIMIT %s
-        """
+        """).format(sql.Identifier(embedding_column), sql.SQL(operator))
         
         # Prepare parameters
         vector_param = query_vector.tolist()
@@ -159,15 +164,18 @@ class PostgreSQLConnector:
         Returns:
             Dictionary with statistics
         """
+        if not self.conn or not self.cursor:
+            raise RuntimeError("Database connection is not established. Call connect() first.")
+            
         stats = {}
         
         # Get row count
-        query = f"SELECT COUNT(*) FROM {table}"
+        query = sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(table))
         result = self.execute_query(query)
         stats['n_tuples'] = result[0][0]
         
         # Get table size
-        query = f"SELECT pg_total_relation_size('{table}')"
+        query = sql.SQL("SELECT pg_total_relation_size({})").format(sql.Literal(table))
         result = self.execute_query(query)
         stats['table_size_bytes'] = result[0][0]
         
